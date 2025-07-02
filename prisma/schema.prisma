@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Users table - API consumers
+model User {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  apiKey      String   @unique @map("api_key")
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED, DELETED
+  pricingTier String   @default("FREE") @map("pricing_tier")
+  rateLimit   Int      @default(1000) @map("rate_limit")
+  rateLimitWindow Int  @default(3600) @map("rate_limit_window") // in seconds
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  usageLogs     ApiUsageLog[]
+  monthlyUsage  MonthlyUsageSummary[]
+  invoices      BillingInvoice[]
+
+  @@map("users")
+}
+
+// API Endpoints table
+model ApiEndpoint {
+  id          String   @id @default(uuid())
+  name        String
+  path        String
+  method      String   // GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  usageLogs   ApiUsageLog[]
+
+  @@unique([path, method])
+  @@map("api_endpoints")
+}
+
+// API Usage Logs table
+model ApiUsageLog {
+  id             String      @id @default(uuid())
+  userId         String      @map("user_id")
+  endpointId     String      @map("endpoint_id")
+  timestamp      DateTime    @default(now())
+  statusCode     Int         @map("status_code")
+  responseTimeMs Int         @map("response_time_ms")
+  requestSize    Int?        @map("request_size")
+  responseSize   Int?        @map("response_size")
+  userAgent      String?     @map("user_agent")
+  ipAddress      String?     @map("ip_address")
+  errorMessage   String?     @map("error_message")
+
+  // Relations
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint   ApiEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@map("api_usage_logs")
+}
+
+// Monthly Usage Summary table
+model MonthlyUsageSummary {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  monthYear      String   @map("month_year") // Format: "2024-01"
+  totalCalls     Int      @default(0) @map("total_calls")
+  successfulCalls Int     @default(0) @map("successful_calls")
+  failedCalls    Int      @default(0) @map("failed_calls")
+  avgResponseTime Float   @default(0) @map("avg_response_time")
+  totalDataTransfer BigInt @default(0) @map("total_data_transfer")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, monthYear])
+  @@map("monthly_usage_summary")
+}
+
+// Billing Invoices table
+model BillingInvoice {
+  id          String        @id @default(uuid())
+  userId      String        @map("user_id")
+  monthYear   String        @map("month_year") // Format: "2024-01"
+  totalCalls  Int           @map("total_calls")
+  billAmount  Float         @map("bill_amount") // Changed from Decimal to Float for SQLite
+  currency    String        @default("INR")
+  status      String        @default("PENDING") // PENDING, PAID, OVERDUE, CANCELLED
+  dueDate     DateTime      @map("due_date")
+  paidAt      DateTime?     @map("paid_at")
+  generatedAt DateTime      @default(now()) @map("generated_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, monthYear])
+  @@map("billing_invoices")
+}
+
+// Pricing Tiers table
+model PricingTier {
+  id              String  @id @default(uuid())
+  name            String  @unique
+  description     String?
+  rateLimit       Int     @map("rate_limit")
+  rateLimitWindow Int     @map("rate_limit_window") // in seconds
+  pricePer1000Calls Float @map("price_per_1000_calls") // Changed from Decimal to Float for SQLite
+  isActive        Boolean @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("pricing_tiers")
+}
+
+// Admin Users table
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // hashed
+  name      String
+  role      String   @default("ADMIN") // SUPER_ADMIN, ADMIN, VIEWER
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+// Rate Limit Tracker (for in-memory tracking)
+model RateLimitTracker {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  windowStart DateTime @map("window_start")
+  requestCount Int    @map("request_count")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, windowStart])
+  @@map("rate_limit_tracker")
+}
+
+

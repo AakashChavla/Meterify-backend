@@ -1,0 +1,173 @@
+Perfect! Below is your **2-Month Solo Developer Roadmap** for building your **API Usage Tracking & Billing SaaS (NestJS + PostgreSQL)**.
+
+---
+
+# 🚀 2-Month Solo Developer Roadmap (MVP Launch Plan)
+
+---
+
+## ✅ Month 1: Core Backend API + Database Layer
+
+---
+
+### Week 1: Project Setup & Basic API Skeleton
+
+* ✅ Setup NestJS project (use TypeScript, latest version)
+* ✅ Setup PostgreSQL locally or on Railway/Render
+* ✅ Setup TypeORM or Prisma (your choice) for DB ORM
+* ✅ Design and create PostgreSQL database schema:
+
+| Table                   | Purpose                          |
+| ----------------------- | -------------------------------- |
+| users                   | Stores API users                 |
+| api\_usage\_logs        | Tracks every API call            |
+| monthly\_usage\_summary | Stores monthly aggregated counts |
+| billing\_invoices       | Stores billing data              |
+
+* ✅ Setup basic REST routes for:
+
+| Route               | Purpose                                     |
+| ------------------- | ------------------------------------------- |
+| POST /users         | Create user with API Key                    |
+| GET /users          | List all users                              |
+| GET /usage/\:userId | Get usage stats for user                    |
+| POST /logs          | Track API usage log (simulate real API hit) |
+
+---
+
+### Week 2: API Usage Logging + API Key Authentication
+
+* ✅ Implement API Key middleware for authentication
+* ✅ Every incoming API call → Log entry in `api_usage_logs`
+* ✅ Store fields like: user\_id, endpoint, timestamp
+* ✅ Implement daily cron job (Nest Schedule module) to auto-aggregate daily data
+* ✅ Start testing with Postman / Thunder Client
+
+---
+
+### Week 3: Monthly Usage Summary + Billing Logic
+
+* ✅ Create cron job for monthly usage summarization
+* ✅ Generate data into `monthly_usage_summary`
+* ✅ Auto-calculate bill amount (e.g., ₹1 per 1000 calls)
+* ✅ Generate billing records into `billing_invoices`
+* ✅ API endpoints for:
+
+| Route                 | Purpose                    |
+| --------------------- | -------------------------- |
+| GET /billing/\:userId | Get user's billing history |
+| GET /summary/\:userId | Monthly usage summary      |
+
+---
+
+### Week 4: Simple Admin & User APIs (Optional Frontend Later)
+
+* ✅ Basic NestJS Admin-only routes to:
+
+| Route               | Purpose           |
+| ------------------- | ----------------- |
+| GET /admin/users    | View all users    |
+| GET /admin/logs     | View usage logs   |
+| GET /admin/invoices | View all invoices |
+
+* ✅ JWT-based simple admin auth OR hardcoded token for MVP
+* ✅ Manual data export (CSV/JSON) for now
+
+---
+
+## ✅ Month 2: Monitoring, Testing, Deployment & Marketing Prep
+
+---
+
+### Week 5: Testing + Error Handling + Logging
+
+* ✅ Add error handling (400, 401, 500 errors)
+* ✅ Add global NestJS exception filters
+* ✅ Add logging (Nest Logger or Winston)
+* ✅ Unit test for critical endpoints
+
+---
+
+### Week 6: Deployment
+
+* ✅ Deploy backend on Render / Railway (Free / Low-cost VPS)
+* ✅ Deploy PostgreSQL (managed or Railway Postgres)
+* ✅ Setup environment variables (for DB, API secrets)
+* ✅ Test deployment URL with Postman
+
+---
+
+### Week 7: Create Marketing & Landing Page (Optional Frontend)
+
+* ✅ Simple HTML / React frontend (if you want)
+
+* ✅ Content on landing page:
+
+  * Problem it solves
+  * Features
+  * Sample Pricing
+  * Signup form (collect emails or API key generation)
+
+* ✅ Integrate Email collection tool (or just Google Form link for now)
+
+---
+
+### Week 8: User Outreach Phase
+
+* ✅ Prepare your "early access" DM / Email template
+* ✅ Post on:
+
+| Platform     | Action                                    |
+| ------------ | ----------------------------------------- |
+| IndieHackers | Build in public post                      |
+| Reddit       | Share on r/webdev, r/SaaS                 |
+| LinkedIn     | Message 50 small SaaS founders            |
+| Twitter/X    | Post weekly build updates                 |
+| Discord      | Share in SaaS/startup/Node.js communities |
+
+* ✅ Offer **Free Beta access for first 10 users**
+
+---
+
+## ✅ Tools You’ll Need Along the Way
+
+| Task            | Tool                                |
+| --------------- | ----------------------------------- |
+| Hosting         | Render / Railway                    |
+| DB              | PostgreSQL                          |
+| API Docs        | Swagger                             |
+| Testing         | Postman / Thunder Client            |
+| Version Control | GitHub                              |
+| Deployment      | Railway / Docker (optional for now) |
+
+---
+
+## ✅ What’s NOT Required (MVP First)
+
+* No need for complex UI dashboards (start with APIs only)
+* No complex DevOps (use Railway/Render for now)
+* No payment gateway yet (you can send manual invoices first)
+
+---
+
+## ✅ Final Tip:
+
+👉 **Start building backend immediately**
+👉 **Focus on working API and core logic**
+👉 **Start posting progress online weekly (build-in-public style)**
+👉 **Talk to early users while coding**
+
+---
+
+If you want, I can next generate:
+✅ Full **Swagger/OpenAPI API spec draft**
+✅ Sample **billing calculation logic code (NestJS)**
+✅ Or help with **writing your landing page website content**
+
+---
+
+**What do you want next? (API Docs / Sample Code / Landing Page / Other)?**
+
+
+
+

@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: meterify-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: meterify
+      POSTGRES_USER: meterify_user
+      POSTGRES_PASSWORD: meterify_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - meterify-network
+
+  # Redis (for caching and rate limiting)
+  redis:
+    image: redis:7-alpine
+    container_name: meterify-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - meterify-network
+
+  # Meterify Application
+  meterify:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: meterify-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://meterify_user:meterify_password@postgres:5432/meterify?schema=public
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - JWT_EXPIRES_IN=7d
+      - API_PREFIX=api/v1
+      - PORT=3000
+      - DEFAULT_RATE_LIMIT=1000
+      - DEFAULT_RATE_WINDOW=3600
+      - DEFAULT_PRICE_PER_1000_CALLS=10
+      - CURRENCY=INR
+      - LOG_LEVEL=info
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - meterify-network
+
+  # Nginx (for production reverse proxy)
+  nginx:
+    image: nginx:alpine
+    container_name: meterify-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - meterify
+    networks:
+      - meterify-network
+
+networks:
+  meterify-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
