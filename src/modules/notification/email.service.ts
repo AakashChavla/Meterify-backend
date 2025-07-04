@@ -67,13 +67,15 @@ export class EmailService {
       });
 
       // Test connection
-      this.transporter.verify()
-        .then(() => {
-          this.logger.log('✅ Email service initialized successfully');
-        })
-        .catch((error) => {
-          this.logger.error(`❌ Email service initialization failed: ${error.message}`);
-        });
+      if (this.transporter && this.transporter.verify) {
+        this.transporter.verify()
+          .then(() => {
+            this.logger.log('✅ Email service initialized successfully');
+          })
+          .catch((error) => {
+            this.logger.error(`❌ Email service initialization failed: ${error.message}`);
+          });
+      }
     } catch (error) {
       this.logger.error(`❌ Failed to create email transporter: ${error.message}`);
     }

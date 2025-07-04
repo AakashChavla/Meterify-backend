@@ -15,11 +15,8 @@ describe('EmailService', () => {
   beforeEach(async () => {
     mockTransporter = {
       sendMail: jest.fn(),
-      verify: jest.fn(),
+      verify: jest.fn().mockResolvedValue(true),
     };
-
-    // Use mockImplementation for createTransport
-    mockNodemailer.createTransport = jest.fn().mockReturnValue(mockTransporter);
 
     const mockConfigService = {
       get: jest.fn(),
@@ -38,14 +35,17 @@ describe('EmailService', () => {
     service = module.get<EmailService>(EmailService);
     configService = module.get(ConfigService);
 
+    // Manually set the transporter after service initialization
+    (service as any).transporter = mockTransporter;
+
     // Configure mock config service
     configService.get.mockImplementation((key: string) => {
       const config = {
-        SMTP_HOST: 'smtp.gmail.com',
+        SMTP_HOST: 'smtp.example.com',
         SMTP_PORT: 587,
-        SMTP_USER: 'akashchawla497@gmail.com',
-        SMTP_PASS: 'btms fvmr nubc eywc',
-        EMAIL_FROM: 'Meterify <akashchawla497@gmail.com>',
+        SMTP_USER: 'test@example.com',
+        SMTP_PASS: 'test-password',
+        EMAIL_FROM: 'Meterify <test@example.com>',
       };
       return config[key];
     });
@@ -89,7 +89,7 @@ describe('EmailService', () => {
       const result = await service.sendInvoiceEmail(mockInvoice);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith({
-        from: 'Meterify <akashchawla497@gmail.com>',
+        from: 'Meterify <test@example.com>',
         to: 'john@example.com',
         subject: 'Invoice INV-001 - ₹10.00',
         html: expect.stringContaining('John Doe'),
@@ -142,7 +142,7 @@ describe('EmailService', () => {
       const result = await service.sendWelcomeEmail(userData);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith({
-        from: 'Meterify <akashchawla497@gmail.com>',
+        from: 'Meterify <test@example.com>',
         to: 'john@example.com',
         subject: 'Welcome to Meterify! 🚀',
         html: expect.stringContaining('John Doe'),
@@ -179,7 +179,7 @@ describe('EmailService', () => {
       const result = await service.sendPaymentConfirmationEmail(paymentData);
 
       expect(mockTransporter.sendMail).toHaveBeenCalledWith({
-        from: 'Meterify <akashchawla497@gmail.com>',
+        from: 'Meterify <test@example.com>',
         to: 'john@example.com',
         subject: 'Payment Confirmed - Invoice INV-001',
         html: expect.stringContaining('John Doe'),
